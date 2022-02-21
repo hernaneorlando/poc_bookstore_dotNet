@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+
+  sql-database:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sql-database
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=User@123
+      - MSSQL_PID=Developer
+    networks:
+      - poc-network
+
+  nosql-database:
+    image: mongo:latest
+    container_name: nosql-database
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    networks:
+      - poc-network
+
+  bookstore-back:
+    build:
+      dockerfile: backend/Dockerfile
+      context: .
+    image: bookstore-back
+    container_name: bookstore-back
+    ports:
+      - 8080:80
+    depends_on:
+      - sql-database
+      - nosql-database
+    networks:
+      - poc-network
+
+networks:
+  poc-network:
+    driver: bridge
